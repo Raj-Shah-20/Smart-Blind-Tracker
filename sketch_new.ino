@@ -1,0 +1,111 @@
+#include <TinyGPS.h>
+#include <SoftwareSerial.h>
+#include<string.h>
+
+SoftwareSerial gsm(7, 8);
+TinyGPS gps;
+
+String PhoneNumber="+919022061307";
+String message1="I am in danger! My location is :";
+String message2="I am robbed off! My location is:";
+String message3="I am lost! My location:";
+
+void setup() {
+  pinMode(13,INPUT);
+  pinMode(12,INPUT);
+  pinMode(11,INPUT);
+  pinMode(10,INPUT);
+  pinMode(9,OUTPUT);
+  Serial.begin(9600);
+  gsm.begin(9600);
+}
+
+void loop() {
+  bool newData = false;
+  float flat, flon;
+  unsigned long age;
+
+  for (unsigned long start = millis(); millis() - start < 1000;)
+  {
+    while (Serial.available())
+    {
+      char c = Serial.read();
+      if (gps.encode(c))
+        newData = true;
+    }
+  }
+  if (newData)
+  {
+    gps.f_get_position(&flat, &flon, &age);
+    Serial.print("LAT=");
+    Serial.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
+    Serial.print(" LON=");
+    Serial.print(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
+  }
+  
+  if(digitalRead(10)== HIGH){
+    tone(9,700,1000);
+    delay(1000);
+    noTone(9);
+    }
+      if(digitalRead(13) == HIGH){
+      String lat, lon;
+      lat= String(flat,8);
+      lon= String(flon,8);
+      gsm.println("AT+CMGF=1"); 
+      delay(500);
+      gsm.println("AT + CMGS = \"+919022061307");// recipient's mobile number with country code
+      gsm.println("SENDING  MESSAGE.........");
+      delay(500);
+      gsm.print("Latitude:");
+      gsm.println(lat);
+      gsm.print("Longitude:");
+      gsm.println(lon);
+      gsm.print(message1);
+      gsm.println("Google Maps - https://www.google.co.in/maps/place/");
+      delay(1000);
+      gsm.println((char)26);
+      Serial.println((char)26);
+      delay(1000);
+    }
+    else if(digitalRead(12) == HIGH){
+      String lat, lon;
+      lat= String(flat,8);
+      lon= String(flon,8);   
+      gsm.println("AT+CMGF=1"); 
+      delay(500);
+      gsm.println("AT + CMGS = \"+919022061307");// recipient's mobile number with country code
+      gsm.println("SENDING  MESSAGE.........");
+      delay(500);
+      gsm.print("Latitude:");
+      gsm.println(lat);
+      gsm.print("Longitude:");
+      gsm.println(lon);
+      gsm.print(message2);
+      gsm.println("Google Maps - https://www.google.co.in/maps/place/");
+      delay(1000);
+      gsm.println((char)26); 
+      Serial.println((char)26);
+      delay(1000);
+    }
+    else if(digitalRead(11) == HIGH){
+      String lat, lon;
+      lat= String(flat,8);
+      lon= String(flon,8);   
+      gsm.println("AT+CMGF=1"); 
+      delay(500);
+      gsm.println("AT + CMGS = \"+919022061307");// recipient's mobile number with country code
+      gsm.println("SENDING  MESSAGE.........");
+      delay(500);
+      gsm.print("Latitude:");
+      gsm.println(lat);
+      gsm.print("Longitude:");
+      gsm.println(lon);
+      gsm.print(message3);
+      gsm.println("Google Maps - https://www.google.co.in/maps/place/");
+      delay(1000);
+      gsm.println((char)26);
+      Serial.println((char)26);
+      delay(1000);
+      }
+}
